@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+		<link rel="stylesheet" th:href="@{/css/styles.css}">
+		<title>RSS Feed</title>
+	</head>
+	<body>
+		<nav class="navbar navbar-dark bg-dark">
+  			<a class="navbar-brand" href="#">FeedReader Spring Boot</a>
+		</nav>
+		<div class="container-fluid">
+  			<div class="row">
+  				<section class="pt-3 col-3 fixed-content">
+  					<div class="text-center">
+  						<i class="fas fa-rss-square fa-12x rss-color"></i>
+  					</div>
+  					<div class="mt-3">
+  						<ul class="nav nav-pills flex-column" id="pills-tab" role="tablist">
+  							<li th:each="rss, i : ${feed}" class="row nav-item pill-tab row border-top rss-item" >
+  								<a th:id="${'pills-' + i.index +'-tab'}" class="d-block py-3 w-100" data-toggle="pill" th:href="${'#pills-' + i.index}" role="tab" th:attr="aria-controls=${'pills-' + i.index}" aria-selected="false">
+	  								<span class="col-3 d-block float-left">
+	  									<img th:src="${rss.channel.image?.url} ? ${rss.channel.image?.url} : 'https://cdn2.iconfinder.com/data/icons/social-icon-3/512/social_style_3_rss-512.png'" class="img-rss rounded" th:alt="${rss.channel.title != ''} ? ${rss.channel.title} : 'Desconocido'">
+	  								</span>
+	  								<span class="col-9 d-block float-left">
+	  									<span class="mb-0 d-block" th:text="${rss.channel.title != ''} ? ${rss.channel.title} : 'Desconocido'"></span>
+	  									<small th:text="${rss.channel.description != ''} ? ${rss.channel.description} : 'Desconocido'"></small>
+	  								</span>
+  								</a>
+  							</li>
+						</ul>
+  					</div>
+  				</section>
+  				<section class="pt-3 col-3 col-2-3 fixed-content">
+					<div class="tab-content" id="pills-tabContent">
+						<div th:each="rss, i : ${feed}" class="tab-pane fade" th:classappend="${i.index == 0} ? 'show active' : ''" th:id="${'pills-' + i.index}" role="tabpanel" th:attr="aria-labelledby=${'pills-' + i.index +'-tab'}">
+							<ul class="nav nav-pills mb-3 row" th:id="${'pills-tab-' + i.index}" role="tablist" >
+								<li th:each="item, j : ${rss.channel.items}" class="col-12 nav-item" th:classappend="${j.index != 0} ? 'border-top pt-3' : ''">
+									<img th:if="${item.getItemImage() != null}"class="img-thumbnail mb-3 w-100" th:src="${item.getItemImage()}" th:alt="${item.title}">
+									<h2 class="h6" th:text="${item.title}"></h2>
+									<a class="text-center col-5 btn btn-dark mb-3 btn-sm" th:id="${'pills-' + i.index + '-' + j.index +'-tab'}" data-toggle="pill" th:href="${'#pills-' + i.index + '-' + j.index}" role="tab" th:attr="aria-controls=${'pills-' + i.index + '-' + j.index}" aria-selected="false">Ver artículo</a>
+									<a class="float-right col-5 text-center btn btn-dark mb-3 btn-sm" th:href="${item.link}" target="_blank">Ver en la Web</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+  				</section>
+  				<section class="pt-3 col-6 col-3-3 fixed-content">
+					<div class="tab-content" id="pills-tab-post">
+						<th:block th:each="rss, i : ${feed}">
+							<th:block th:each="item, j : ${rss.channel.items}">
+								<div class="tab-pane fade" th:classappend="${i.index == 0 && j.index == 0} ? 'show active' : ''" th:id="${'pills-' + i.index + '-' + j.index}" role="tabpanel" th:attr="aria-labelledby=${'pills-' + i.index + '-' + j.index +'-tab'}">
+									<article class="row">
+										<div class="col-12">
+											<h3 class="h5 border-bottom pb-1" th:text="${item.title}"></h3>
+										</div>
+										<div class="col-12">
+											<div class="row">
+												<div class="col-6">
+													<i class="fas fa-calendar-alt"></i><span th:text="${#dates.format(item.date, 'dd-MM-yyyy')}" class="ml-3"></span>
+												</div>
+												<div class="col-6 text-right">
+													<i class="fas fa-user"></i><span class="ml-2" th:text="${item.creator}"></span>
+												</div>
+											</div>
+											<hr class="mt-2">
+										</div>
+										<div class="col-12 post-container">
+											<div th:utext="${item.getCompleteDescription()}"></div>
+										</div>
+									</article>								
+								</div>
+							</th:block>
+						</th:block>
+					</div>
+  				</section>
+  			</div>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</body>
+</html>
+
+<!-- th:text="${#dates.format(items[someVariable].date, 'dd-MM-yyyy')}" -->
